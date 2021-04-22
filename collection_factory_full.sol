@@ -27,7 +27,6 @@ abstract contract Context {
 
 // File: node_modules\openzeppelin-solidity\contracts\access\Ownable.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.0;
 
@@ -98,7 +97,7 @@ contract Ownable is Context {
 // File: contracts\NFTCreation_v0\Interface\ICollection_Factory.sol
 
 interface ICollection_Factory {
-    function create(string memory name, string memory symbol, string baseURI, address owner) external returns (address);
+    function createNFT(string memory name, string memory symbol, string  memory baseURI, address owner) external returns (address);
 
     function getcollection(address owner) external view returns (address);
 
@@ -108,7 +107,6 @@ interface ICollection_Factory {
 
 // File: node_modules\openzeppelin-solidity\contracts\introspection\IERC165.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.0;
 
@@ -135,7 +133,6 @@ interface IERC165 {
 
 // File: node_modules\openzeppelin-solidity\contracts\token\ERC721\IERC721.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.2;
 
@@ -266,7 +263,6 @@ interface IERC721 is IERC165 {
 
 // File: node_modules\openzeppelin-solidity\contracts\token\ERC721\IERC721Metadata.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.2;
 
@@ -294,8 +290,6 @@ interface IERC721Metadata is IERC721 {
 }
 
 // File: node_modules\openzeppelin-solidity\contracts\token\ERC721\IERC721Enumerable.sol
-
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.2;
 
@@ -326,7 +320,6 @@ interface IERC721Enumerable is IERC721 {
 
 // File: node_modules\openzeppelin-solidity\contracts\token\ERC721\IERC721Receiver.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.0;
 
@@ -351,7 +344,6 @@ interface IERC721Receiver {
 
 // File: node_modules\openzeppelin-solidity\contracts\introspection\ERC165.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.0;
 
@@ -406,8 +398,6 @@ contract ERC165 is IERC165 {
 }
 
 // File: node_modules\openzeppelin-solidity\contracts\math\SafeMath.sol
-
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.0;
 
@@ -569,7 +559,6 @@ library SafeMath {
 
 // File: node_modules\openzeppelin-solidity\contracts\utils\Address.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.2;
 
@@ -713,7 +702,6 @@ library Address {
 
 // File: node_modules\openzeppelin-solidity\contracts\utils\EnumerableSet.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.0;
 
@@ -959,7 +947,6 @@ library EnumerableSet {
 
 // File: node_modules\openzeppelin-solidity\contracts\utils\EnumerableMap.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.0;
 
@@ -1199,7 +1186,6 @@ library EnumerableMap {
 
 // File: node_modules\openzeppelin-solidity\contracts\utils\Strings.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.0;
 
@@ -1236,7 +1222,6 @@ library Strings {
 
 // File: node_modules\openzeppelin-solidity\contracts\token\ERC721\ERC721.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.0;
 
@@ -1711,7 +1696,6 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable 
 
 // File: node_modules\openzeppelin-solidity\contracts\utils\Counters.sol
 
-// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.6.0;
 
@@ -1752,8 +1736,6 @@ library Counters {
 }
 
 // File: node_modules\openzeppelin-solidity\contracts\proxy\Initializable.sol
-
-// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.4.24 <0.7.0;
 
@@ -1818,9 +1800,13 @@ abstract contract Initializable {
 
 // File: contracts\NFTCreation_v0\collection.sol
 
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.0;
 
-contract NFT_test is ERC721,Ownable {
+
+
+
+
+contract Collection is ERC721,Ownable,Initializable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdTracker;
@@ -1828,9 +1814,11 @@ contract NFT_test is ERC721,Ownable {
     constructor(
         string memory _name,
         string memory _symbol,
-        string memory _baseUri
+        string memory _baseUri,
+        address owner
     ) public Ownable() ERC721(_name, _symbol) {
-        setBaseURI(_baseUri);
+        _setBaseURI(_baseUri);
+        transferOwnership(owner);
     }
 
     /** ===================== mutative function ===================== */
@@ -1844,35 +1832,24 @@ contract NFT_test is ERC721,Ownable {
     }
 
     function changeBaseURI(string memory baseURI_) external {
-        _setBaseURI(baseURL_);
+        _setBaseURI(baseURI_);
     }
 
     function changetokenURI(uint256 tokenId, string memory tokenURI) external {
         _setTokenURI(tokenId, tokenURI);
     }
 
-    function initialize(
-        string memory name,
-        string memory symbol,
-        string memory baseUri,
-        address owner
-    ) external initializer() {
-        _name = name;
-        _symbol = symbol;
-        setBaseURI(_baseUri);
-        transferOwnership(owner);
-    }
 
     /** ===================== internal function ===================== */
 
     function _batchmint(address to,uint amount) internal {
         require(amount != 0, "you must set a amount");
-        for(i=0; i<amount;i++){
+        for(uint i=0; i<amount;i++){
             _singlemint(to);
         }
     }
 
-    function _singlemint(address to) external {
+    function _singlemint(address to) internal {
         require(to != address(0), "to address is not allowed be zero");
         _safeMint(to, _tokenIdTracker.current());
         _tokenIdTracker.increment();
@@ -1889,30 +1866,28 @@ contract NFT_test is ERC721,Ownable {
 
 // File: contracts\NFTCreation_v0\collection_factory.sol
 
-pragma solidity ^0.6.0;
+pragma solidity ^0.6.0;
+
+
+
 
 contract Collection_Factory is Ownable {
-    mapping(address => address) public onwership;
+    mapping(address => address) internal collectionowner;
     address[] public collections;
 
     /** =================== mutative function =================== */
     function create(
         string memory _name,
         string memory _symbol,
-        string memory _baseurl,
+        string memory _baseuri,
         address owner
     ) external returns (address) {
         require( owner != address(0), "you must set a address");
-        bytes memory bytecode = type(collection).creationCode;
-        bytes32 salt = keccak256(abi.encodePacked(_name, _symbol,_baseurl,owner));
-        assembly {
-            pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
-        }
-        ICollection_Factory(pair).initialize(_name,_symbol,_baseurl,owner);
-        onwership[owner] = pair;
-        collections.push(pair);
-
-        emit create( _name, _symbol, _baseurl, owner);
+        Collection collectionaddress = new Collection(_name,_symbol,_baseuri,owner);
+        collectionowner[address(collectionaddress)] = owner;
+        collections.push(address(collectionaddress));
+        emit createNFT( _name, _symbol, address(collectionaddress));
+        return address(collectionaddress);
     }
 
 
@@ -1921,11 +1896,12 @@ contract Collection_Factory is Ownable {
         return collections.length;
     }
 
-    function getcollection(address owner) external returns (address) {
-        return ownership[owner];
+    function getcollection(address nftaddress) external view returns (address) {
+        return collectionowner[nftaddress];
     }
 
+
     /** =================== event =================== */
-    event create(string indexed name, string indexed symbol, string indexed baseurl, address indexed owner);
+    event createNFT(string indexed name, string indexed symbol,address indexed collectionaddress);
 
 }
