@@ -19,7 +19,7 @@ contract Collection is ERC721,Ownable,Initializable {
         transferOwnership(owner);
     }
 
-    /** ===================== mutative function ===================== */
+    /** ===================== external mutative function ===================== */
 
     function mint(address to) external {
         _singlemint(to);
@@ -29,22 +29,23 @@ contract Collection is ERC721,Ownable,Initializable {
         _batchmint(to,amount);
     }
 
-    function changeBaseURI(string memory baseURI_) external {
-        _setBaseURI(baseURI_);
+    function changeBaseURI(string memory baseURI_) external onlyOwner {
+        _changeBaseURI(baseURI_);
     }
 
-    function changetokenURI(uint256 tokenId, string memory tokenURI) external {
-        _setTokenURI(tokenId, tokenURI);
+    function changetokenURI(uint256 tokenId, string memory tokenURI) external onlytokenOwner(tokenId) {
+        _changetokenURI(tokenId, tokenURI);
     }
 
 
-    /** ===================== internal function ===================== */
+    /** ===================== internal mutative function ===================== */
 
     function _batchmint(address to,uint amount) internal {
         require(amount != 0, "you must set a amount");
         for(uint i=0; i<amount;i++){
             _singlemint(to);
         }
+        emit batchmints(to, amount);
     }
 
     function _singlemint(address to) internal {
@@ -52,12 +53,26 @@ contract Collection is ERC721,Ownable,Initializable {
         _safeMint(to, _tokenIdTracker.current());
         _tokenIdTracker.increment();
     }
+    
+    function _changeBaseURI(string memory baseURI_) internal {
+        _setBaseURI(baseURI_);
+    }
+    
+    function _changetokenURI(uint256 tokenId, string memory tokenURI) internal {
+        _setTokenURI(tokenId, tokenURI);
+        emit changedtokenURI(msg.sender, tokenId, tokenURI);
+    }
 
-    /** ===================== view ===================== */
-
+    /** ===================== modifier ===================== */
+    modifier onlytokenOwner(uint tokenId) {
+        require(ownerOf(tokenId) == msg.sender, "Only the owner can modify the tokenURI");
+        _;
+    }
+    
     /** ===================== event ===================== */ 
     
-    
+    event batchmints(address indexed to, uint indexed amount);
+    event changedtokenURI(address indexed owner, uint indexed tokenId, string indexed tokenURI);
 
     
 }
