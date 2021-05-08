@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import "../../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -22,7 +23,7 @@ contract Collection is ERC721,Ownable,ERC721URIStorage {
         string memory _symbol,
         string memory _baseUri,
         address owner
-    ) public Ownable() ERC721(_name, _symbol) {
+    ) public ERC721(_name, _symbol) {
         _setBaseURI(_baseUri);
         transferOwnership(owner);
     }
@@ -121,12 +122,13 @@ contract Collection is ERC721,Ownable,ERC721URIStorage {
     
     function _changetokenURI(uint256 tokenId, string memory tokenURI) internal {
         _setTokenURI(tokenId, tokenURI);
-        emit changedtokenURI(msg.sender, tokenId, tokenURI);
+        emit changedtokenURI(_msgSender(), tokenId, tokenURI);
     }
 
     /** ===================== modifier ===================== */
+
     modifier onlytokenOwner(uint tokenId) {
-        require(ownerOf(tokenId) == msg.sender, "Only the owner can modify the tokenURI");
+        require(ownerOf(tokenId) == _msgSender(), "Only the owner can modify the tokenURI");
         _;
     }
     
