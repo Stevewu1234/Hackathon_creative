@@ -24,3 +24,12 @@ NFT contract address: 0x540E640693930A5f8F1e32f1e2639D1e0AD62a1C(Code verificati
 updated points:
 - update Collection's event
 - update Internal functions
+
+---
+
+20210508
+
+NFT contract testing address: (Matic mumbai testnet)
+
+0xe5bE78dC5411b33e3366f9596E0410A509547d74
+
